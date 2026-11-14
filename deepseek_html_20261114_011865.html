@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi UKPPPG Informatika 2026 — PCK & PU</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --card:#ffffff; --ink:#172033; --muted:#667085;
+    --line:#d9e2ec; --brand:#1f5eff; --brand2:#0d3fc4;
+    --ok:#0f9d58; --okbg:#e8f7ef; --bad:#d92d20; --badbg:#fdecea;
+    --warn:#b54708; --warnbg:#fff4e5; --shadow:0 10px 30px rgba(23,32,51,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter, Segoe UI, Roboto, Arial, sans-serif;background:var(--bg);color:var(--ink)}
+  header{
+    position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#0d3fc4,#1f5eff);
+    color:#fff;padding:14px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;
+    box-shadow:0 4px 18px rgba(13,63,196,.25)
+  }
+  header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
+  header .sub{font-size:12px;opacity:.85;margin-top:2px}
+  .timer{font-variant-numeric:tabular-nums;background:rgba(255,255,255,.15);padding:8px 14px;border-radius:12px;font-weight:800;font-size:18px;border:1px solid rgba(255,255,255,.25)}
+  .timer.danger{background:#d92d20;border-color:#ffb4ad;animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.75}}
+  .layout{display:grid;grid-template-columns:340px 1fr;gap:18px;padding:18px;max-width:1500px;margin:0 auto}
+  aside{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow);height:calc(100vh - 100px);overflow:auto;position:sticky;top:82px}
+  main{min-width:0}
+  .side-title{font-weight:800;font-size:14px;margin-bottom:12px}
+  .section-block{margin-bottom:18px}
+  .section-block h3{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:0 0 8px}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+  .qbtn{
+    border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:8px 0;
+    font-weight:700;font-size:12px;cursor:pointer;transition:.15s;position:relative
+  }
+  .qbtn:hover{border-color:var(--brand);color:var(--brand)}
+  .qbtn.answered{background:var(--okbg);border-color:#9be3bd;color:#087443}
+  .qbtn.marked{background:var(--warnbg);border-color:#f7c56b;color:var(--warn)}
+  .qbtn.current{outline:3px solid rgba(31,94,255,.25);border-color:var(--brand);color:var(--brand)}
+  .side-footer{border-top:1px solid var(--line);padding-top:14px;margin-top:10px}
+  .progress{height:9px;background:#e9eef6;border-radius:99px;overflow:hidden;margin-bottom:8px}
+  .progress .bar{height:100%;background:linear-gradient(90deg,#1f5eff,#0f9d58);width:0;transition:.3s}
+  #progressText{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+  button{font-family:inherit}
+  .danger{
+    width:100%;margin-top:12px;background:var(--bad);color:#fff;border:0;border-radius:12px;
+    padding:12px 14px;font-weight:800;cursor:pointer
+  }
+  .danger:hover{background:#b42318}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+  .qmeta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .badge{font-size:11px;font-weight:800;padding:5px 9px;border-radius:99px;background:#eef3ff;color:#0d3fc4}
+  .badge.type{background:#f2f4f7;color:#475467}
+  h2.qtitle{margin:0 0 14px;font-size:20px}
+  
+  /* Format teks soal */
+  .qtext{white-space: pre-wrap; line-height:1.65; font-size:15px; margin-bottom:18px;}
+  
+  .hint{font-size:13px;color:var(--muted);margin:0 0 10px}
+  .note{background:var(--warnbg);border:1px solid #f7c56b;color:#7a3e00;padding:10px 12px;border-radius:12px;font-size:13px;margin-bottom:14px}
+  .options{display:grid;gap:10px}
+  .option{
+    display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:13px;
+    padding:12px 14px;cursor:pointer;background:#fff;transition:.15s;line-height:1.45
+  }
+  .option:hover{border-color:#9db7ff;background:#f8faff}
+  .option input{margin-top:4px;transform:scale(1.15);accent-color:var(--brand)}
+  .option span{font-size:14px}
+  .kat-table{width:100%;border-collapse:collapse;font-size:14px}
+  .kat-table th,.kat-table td{border:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}
+  .kat-table th{background:#f8faff;font-size:12px;color:#344054}
+  .kat-table td:nth-child(1){width:42px;text-align:center;font-weight:700}
+  .kat-table td:nth-child(3),.kat-table td:nth-child(4){width:120px;text-align:center}
+  .kat-table input{transform:scale(1.2);accent-color:var(--brand)}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+  .actions button{
+    border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:10px 14px;
+    font-weight:700;cursor:pointer
+  }
+  .actions button:hover{border-color:var(--brand);color:var(--brand)}
+  .actions .primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .actions .primary:hover{background:var(--brand2);color:#fff}
+  .actions .spacer{flex:1}
+  .result-wrap{display:grid;gap:16px}
+  .score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .score-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+  .score-card .label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:800}
+  .score-card .value{font-size:26px;font-weight:900;margin-top:6px}
+  .score-card .small{font-size:12px;color:var(--muted);margin-top:4px}
+  .result-table{width:100%;border-collapse:collapse;font-size:13px}
+  .result-table th,.result-table td{border:1px solid var(--line);padding:9px;vertical-align:top}
+  .result-table th{background:#f8faff;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#344054}
+  .ok-text{color:var(--ok);font-weight:800}
+  .bad-text{color:var(--bad);font-weight:800}
+  .result-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .result-actions button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+  .result-actions .primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  @media(max-width:900px){
+    .layout{grid-template-columns:1fr;padding:12px}
+    aside{position:static;height:auto;order:2}
+    main{order:1}
+    .score-grid{grid-template-columns:repeat(2,1fr)}
+    .grid{grid-template-columns:repeat(6,1fr)}
+  }
+  @media(max-width:520px){
+    .grid{grid-template-columns:repeat(5,1fr)}
+    .kat-table{display:block;overflow:auto}
+    .score-grid{grid-template-columns:1fr 1fr}
+    header h1{font-size:13px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Latihan UKPPPG Informatika 2026 — PCK & PU</h1>
+    <div class="sub">Bagian A: 50 Soal PCK • Bagian B: 30 Soal Pedagogi Umum</div>
+  </div>
+  <div id="timer" class="timer">02:00:00</div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+  <main>
+    <div id="examView" class="card">
+      <div class="qmeta">
+        <span class="badge" id="sectionBadge"></span>
+        <span class="badge type" id="typeBadge"></span>
+      </div>
+      <h2 class="qtitle" id="qTitle"></h2>
+      <div class="qtext" id="qText"></div>
+      <div id="qBody"></div>
+      <div class="actions">
+        <button id="prevBtn">← Sebelumnya</button>
+        <button id="markBtn">Ragu-ragu</button>
+        <button id="clearBtn">Bersihkan Jawaban</button>
+        <span class="spacer"></span>
+        <button id="nextBtn" class="primary">Berikutnya →</button>
+      </div>
+    </div>
+
+    <div id="resultView" class="card" style="display:none"></div>
+  </main>
+</div>
+
+<script>
+/* =========================================================
+   DATA SOAL — 80 Butir
+   Bagian A: PCK (1-50) | Bagian B: PU (1-30)
+   ========================================================= */
+const DATA = [
+  /* ================= BAGIAN A: PCK INFORMATIKA ================= */
+  {s:"A",n:1,t:"pg",title:"PCK 1",q:`Bu Ratna mengajar Informatika di kelas VII. Pada pertemuan keempat, murid diminta merancang sistem antrean kantin sekolah. Dimas membagi masalah menjadi empat bagian: menerima pesanan, menghitung total, mencetak struk, dan memanggil nomor antrean. Kelompok Dimas juga memutuskan hanya menyimpan nomor antrean, nama menu, dan jumlah porsi, sementara warna seragam pembeli dan nama penjual diabaikan. Kelompok lain berkomentar bahwa "semua kantin sebenarnya melakukan pola yang sama: pesan, bayar, ambil". Bu Ratna ingin pengalaman belajar ini bergerak dari pemahaman konseptual, penerapan kontekstual, hingga refleksi bermakna. Langkah lanjutan yang paling tepat adalah ...`,o:[
+  `A. meminta murid menamai setiap tahap kerja dengan istilah berpikir komputasional, kemudian menguji definisi istilah tersebut melalui tes tertulis`,
+  `B. meminta murid mengidentifikasi bagian hasil kerja mereka yang termasuk dekomposisi, pengenalan pola, dan abstraksi, menerapkan pola yang sama pada kasus lain seperti antrean perpustakaan, lalu merefleksikan persamaan dan perbedaannya`,
+  `C. menayangkan diagram alur lengkap sistem antrean agar murid menyalinnya ke aplikasi diagram dengan rapi sebelum dinilai`,
+  `D. meminta murid langsung membuat program antrean dalam bahasa pemrograman tertentu agar konsep tampak nyata tanpa membahas istilah apa pun`
+  ],k:"B"},
+
+  {s:"A",n:2,t:"pg",title:"PCK 2",q:`Pak Hendra mengajarkan variabel dan perulangan Python di kelas VIII. Pada kuis, Salsa menulis dua baris: x = 5 lalu x = x + 2. Salsa menandai baris kedua sebagai "salah" dengan alasan "5 tidak mungkin sama dengan 5 ditambah 2". Padahal Salsa terampil menghitung dan sudah paham tipe data bilangan. Diagnosis dan tindak lanjut yang paling tepat adalah ...`,o:[
+  `A. Salsa belum menguasai operasi penjumlahan sehingga perlu remedial aritmetika sebelum kembali ke pemrograman`,
+  `B. Salsa keliru memahami urutan eksekusi baris program, sehingga perlu diberi soal diagram alur tanpa kode terlebih dahulu`,
+  `C. Salsa memaknai tanda "=" sebagai kesamaan matematis, bukan penugasan nilai; Pak Hendra menelusuri nilai variabel langkah demi langkah dengan tabel jejak (trace table) agar Salsa melihat nilai x berubah seiring waktu`,
+  `D. Salsa keliru memahami tipe data bilangan bulat dan pecahan, sehingga perlu diberi penjelasan tipe data integer dan float beserta contoh`
+  ],k:"C"},
+
+  {s:"A",n:3,t:"mcma",title:"PCK 3",q:`Bu Sinta mengajarkan pencarian linear pada array kepada kelas IX dengan pendekatan PRIMM (Predict, Run, Investigate, Modify, Make). Murid diberi kode pencarian nama dalam daftar 10 nama. Pilih semua kegiatan yang sesuai dengan tahapan PRIMM tersebut!`,o:[
+  `A. Murid menuliskan tebakan keluaran program untuk beberapa data uji sebelum program dijalankan`,
+  `B. Murid menjalankan program, membandingkan hasilnya dengan tebakan, lalu menelusuri penyebab perbedaan`,
+  `C. Murid langsung menulis program pencarian dari lembar kosong pada pertemuan pertama tanpa membaca contoh kode`,
+  `D. Guru menjelaskan setiap baris kode terlebih dahulu sehingga tidak ada ruang bagi murid untuk menebak`,
+  `E. Murid menambahkan kondisi pada kode yang ada agar menampilkan pesan "tidak ditemukan", kemudian membuat versi pencarian untuk data lain`
+  ],k:["A","B","E"]},
+
+  {s:"A",n:4,t:"kat",title:"PCK 4",q:`Pak Dani mengajar jaringan komputer di sebuah SMP dengan 6 komputer untuk 32 murid dan koneksi internet yang tidak stabil. Ia merancang aktivitas "paket data" di lapangan: murid berperan sebagai router, membawa kartu paket, dan memilih jalur pada peta yang digambar di lantai. Tentukan apakah pernyataan berikut Sesuai atau Tidak Sesuai dengan penerapan pembelajaran unplugged yang baik!`,labels:["Sesuai","Tidak Sesuai"],st:[
+  `Peran "router" dan kartu paket dipakai untuk mengonkretkan konsep penentuan jalur sebelum murid melihat simulasinya di komputer.`,
+  `Karena unplugged efektif, seluruh simulasi di komputer dihapus meskipun komputer dapat dipakai bergiliran.`,
+  `Setelah aktivitas, guru menghubungkan peran "router" dengan perintah ping dan traceroute pada simulasi secara bergilir.`,
+  `Keberhasilan aktivitas cukup dinilai dari keaktifan dan keramaian murid tanpa kriteria pencapaian tujuan pembelajaran.`
+  ],k:[0,1,0,1]},
+
+  {s:"A",n:5,t:"pg",title:"PCK 5",q:`Dalam praktik pemrograman berpasangan di kelas X, Rafi selalu memegang papan ketik dan menyelesaikan hampir seluruh kode, sedangkan Nayla hanya mengangguk dan jarang berbicara. Hasil program benar, tetapi pada pertanyaan lisan Nayla tidak dapat menjelaskan alurnya. Bu Tiwi ingin tetap memakai pair programming. Tindakan yang paling tepat adalah ...`,o:[
+  `A. menetapkan Rafi sebagai pembimbing tetap karena sudah mahir, sedangkan Nayla mengamati agar belajar dari pakar`,
+  `B. menugaskan peran driver dan navigator yang bergantian pada interval waktu tertentu, dengan lembar peran yang memuat tugas masing-masing dan pertanyaan penuntun yang harus diajukan navigator`,
+  `C. menukar pasangan secara permanen agar Nayla mendapat pasangan yang lebih sabar tanpa mengubah struktur kegiatan`,
+  `D. mengganti pair programming dengan tugas individu agar kemampuan tiap murid dapat dinilai secara adil`
+  ],k:"B"},
+
+  {s:"A",n:6,t:"pg",title:"PCK 6",q:`Asesmen awal sederhana di kelas VIII yang terdiri dari 32 murid menunjukkan: 11 murid belum mampu menelusuri alur if-else, 15 murid mampu menelusuri tetapi belum dapat menulisnya, dan 6 murid sudah dapat menulis perulangan sederhana. Bu Yuli ingin menerapkan pendekatan Teaching at the Right Level (TaRL). Rancangan yang paling sesuai adalah ...`,o:[
+  `A. membagi kelas berdasarkan peringkat rapor semester lalu agar kelompok stabil sepanjang semester`,
+  `B. memberi materi yang sama kepada semua murid dan menambah tugas pengayaan untuk 6 murid yang sudah mahir`,
+  `C. memfokuskan sesi tambahan hanya untuk 11 murid terendah, sedangkan murid lain belajar mandiri dari buku`,
+  `D. mengelompokkan murid secara fleksibel berdasarkan capaian pada asesmen, menyiapkan aktivitas yang sesuai tiap kelompok, lalu memantau secara berkala untuk memindahkan murid ke kelompok berikutnya`
+  ],k:"D"},
+
+  {s:"A",n:7,t:"kat",title:"PCK 7",q:`Sekolah tempat Bu Yuli mengajar sedang mempelajari pendekatan TaRL untuk pembelajaran Informatika. Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Pengelompokan murid didasarkan pada hasil asesmen capaian, bukan pada kelas atau usia.`,
+  `Setelah kelompok terbentuk, komposisi dikunci sepanjang semester agar suasana belajar stabil.`,
+  `Asesmen awal TaRL harus berupa ujian tertulis panjang agar datanya valid.`,
+  `Guru memantau kemajuan murid secara berkala dan memindahkan murid ke kelompok yang lebih tinggi saat capaiannya meningkat.`
+  ],k:[0,1,1,0]},
+
+  {s:"A",n:8,t:"pg",title:"PCK 8",q:`Kelas IX Bu Maya terdiri dari murid dengan disleksia, murid yang kurang percaya diri berbicara di depan kelas, dan murid yang sangat cepat menyelesaikan tugas. Ia akan mengajarkan materi analisis data. Menurut prinsip Desain Universal untuk Pembelajaran (DUP/UDL), rancangan yang paling tepat adalah ...`,o:[
+  `A. menyiapkan satu modul standar, lalu memberikan perpanjangan waktu hanya kepada murid yang mengalami kesulitan membaca`,
+  `B. membagi kelas menjadi tiga tingkat kesulitan tetap dan menetapkan satu format laporan tertulis untuk semua tingkat`,
+  `C. merancang sejak awal beragam cara penyajian materi (teks, diagram, video bertakarir), beragam cara menunjukkan pemahaman (laporan, presentasi, rekaman suara), dan pilihan tema data untuk menjaga keterlibatan`,
+  `D. menunggu murid menunjukkan kesulitan, lalu menyediakan akomodasi khusus sesuai kebutuhan individual`
+  ],k:"C"},
+
+  {s:"A",n:9,t:"mcma",title:"PCK 9",q:`Pak Imam akan mengajar topik algoritma pengurutan dan ingin rancangannya mencerminkan prinsip DUP. Pilih semua rancangan yang tepat!`,o:[
+  `A. Menyediakan penjelasan dalam bentuk animasi, diagram, dan pseudocode, serta menyediakan teks alternatif dan takarir`,
+  `B. Mengizinkan murid menunjukkan pemahaman melalui program, video penjelasan, atau demonstrasi langsung`,
+  `C. Menetapkan satu format ujian tertulis agar penilaian seragam dan adil`,
+  `D. Menyediakan pilihan konteks data (nilai ujian, skor pertandingan, jarak tempuh) sesuai minat murid dengan tujuan pembelajaran yang sama`,
+  `E. Membatasi sumber belajar pada buku paket agar murid tidak bingung memilih`
+  ],k:["A","B","D"]},
+
+  {s:"A",n:10,t:"kat",title:"PCK 10",q:`Pak Bagas mengajarkan struktur perulangan di kelas VIII. Tentukan apakah masing-masing pernyataan berikut Sesuai atau Tidak Sesuai sebagai contoh diferensiasi proses!`,labels:["Sesuai","Tidak Sesuai"],st:[
+  `Murid boleh memilih bekerja mandiri dengan lembar panduan bertahap, berpasangan, atau di meja kecil bersama guru.`,
+  `Murid boleh memilih menunjukkan pemahaman melalui aplikasi, poster infografis, atau video penjelasan.`,
+  `Guru menyediakan tiga versi bahan bacaan sesuai kesiapan baca murid.`,
+  `Guru menyiapkan tahapan dan tingkat scaffolding yang berbeda bagi kelompok yang menyelesaikan tugas penelusuran kesalahan program.`
+  ],k:[0,1,1,0]},
+
+  {s:"A",n:11,t:"pg",title:"PCK 11",q:`Pak Bayu mengajar di SMA dekat pasar tradisional. Murid mewawancarai pedagang tentang pencatatan stok, merancang basis data sederhana secara berkelompok, dan melihat contoh diagram relasi dari sebuah toko sebagai model. Di akhir unit, mereka menuliskan apa yang berubah dari pemahaman awalnya. Namun penilaian hanya berupa tes pilihan ganda tentang istilah basis data. Komponen CTL yang belum tercermin pada rancangan ini adalah ...`,o:[
+  `A. pemodelan (modeling)`,
+  `B. masyarakat belajar (learning community)`,
+  `C. penilaian autentik (authentic assessment)`,
+  `D. refleksi (reflection)`
+  ],k:"C"},
+
+  {s:"A",n:12,t:"pg",title:"PCK 12",q:`Bu Wulan menerapkan PjBL dengan proyek "aplikasi pengelolaan sampah sekolah". Pada minggu ketiga, dua kelompok belum memiliki rancangan basis data, satu kelompok sibuk memoles tampilan, dan satu kelompok sudah melakukan uji coba. Bu Wulan menetapkan tiga titik periksa mingguan dengan lembar kemajuan yang diisi kelompok dan ia tinjau bersama. Tahap PjBL yang paling dominan dilakukan Bu Wulan adalah ...`,o:[
+  `A. menentukan pertanyaan mendasar`,
+  `B. menyusun jadwal proyek`,
+  `C. memonitor kemajuan proyek`,
+  `D. menguji hasil proyek`
+  ],k:"C"},
+
+  {s:"A",n:13,t:"mcma",title:"PCK 13",q:`Pak Arif membuka pelajaran dengan keluhan nyata bahwa jaringan nirkabel sekolah melambat saat ujian berbasis komputer. Pilih semua kegiatan yang sesuai dengan sintaks PBL!`,o:[
+  `A. Guru menyajikan keluhan tersebut dan murid merumuskan pertanyaan yang ingin dijawab (orientasi pada masalah)`,
+  `B. Guru membantu murid membagi peran dan menyusun jadwal penyelidikan (pengorganisasian murid)`,
+  `C. Guru menyampaikan penyebabnya adalah jumlah titik akses kurang, lalu murid mencatat solusi tersebut`,
+  `D. Guru mendorong murid mengumpulkan data kecepatan, jumlah perangkat, dan lokasi, kemudian menyusun hipotesis (penyelidikan)`,
+  `E. Guru hanya menilai poster akhir tanpa membahas proses pemecahan masalah murid`
+  ],k:["A","B","D"]},
+
+  {s:"A",n:14,t:"pg",title:"PCK 14",q:`Pak Eko menerapkan discovery learning murni pada materi rekursi untuk kelas XI yang belum lancar menulis fungsi. Murid hanya diberi masalah menara Hanoi dan diminta "menemukan sendiri". Setelah 40 menit, sebagian besar murid hanya mencoba-coba tanpa arah dan sebagian menyerah. Penyempurnaan yang paling sesuai dengan teori scaffolding dan beban kognitif adalah ...`,o:[
+  `A. menambah waktu eksplorasi menjadi dua pertemuan penuh tanpa panduan tambahan agar murid terbiasa menemukan sendiri`,
+  `B. mengganti dengan ceramah penuh dan menghentikan seluruh kegiatan eksplorasi`,
+  `C. memberi tugas video mandiri di rumah lalu menilai hasil akhir di pertemuan berikutnya`,
+  `D. menerapkan guided discovery: memberi contoh kerja pada kasus yang lebih sederhana, pertanyaan penuntun bertahap, lalu menyurutkan bantuan seiring kemajuan murid`
+  ],k:"D"},
+
+  {s:"A",n:15,t:"pg",title:"PCK 15",q:`Bu Ika memakai gamifikasi pada kuis pemrograman dengan papan peringkat yang ditampilkan di layar setiap minggu. Murid peringkat atas semakin bersemangat, tetapi beberapa murid yang peringkatnya rendah mulai cemas, enggan mengangkat tangan, dan menghindari kuis. Perbaikan yang paling sesuai dengan prinsip pembelajaran yang berkesadaran, bermakna, dan menggembirakan adalah ...`,o:[
+  `A. mempertahankan papan peringkat dan menambah hadiah bagi peringkat 1 sampai 3 agar murid lain terpacu`,
+  `B. menghapus seluruh unsur permainan dan kembali ke latihan soal biasa agar murid tidak tertekan`,
+  `C. mengganti papan peringkat publik dengan pencapaian kemajuan pribadi dan lencana penguasaan keterampilan, serta menambah sesi refleksi tentang strategi belajar`,
+  `D. merahasiakan peringkat dari murid tetapi tetap memakainya sebagai dasar nilai akhir`
+  ],k:"C"},
+
+  {s:"A",n:16,t:"mcma",title:"PCK 16",q:`Pak Wira ingin pengalaman belajar kompresi data di kelas IX mendorong pemahaman konseptual, penerapan kontekstual, dan refleksi bermakna. Pilih semua kegiatan yang mencerminkannya!`,o:[
+  `A. Murid membandingkan ukuran berkas gambar dan teks sebelum serta sesudah kompresi, lalu menjelaskan mengapa hasilnya berbeda`,
+  `B. Murid memilih format berkas untuk dokumentasi kegiatan sekolah yang akan dikirim lewat jaringan lambat, lalu menjelaskan alasannya`,
+  `C. Murid menghafalkan nama dan rumus berbagai algoritma kompresi untuk dites minggu depan`,
+  `D. Murid menuliskan strategi yang membantu mereka memahami kompresi dan bagian yang masih membingungkan`,
+  `E. Murid menyalin ringkasan dari buku ke buku catatan dengan rapi`
+  ],k:["A","B","D"]},
+
+  {s:"A",n:17,t:"pg",title:"PCK 17",q:`Bu Rina meminta murid kelas VIII membuat program kalkulator sederhana. Hasil periksa menunjukkan 60 persen program galat karena pembagian dengan nol dan masukan huruf, sedangkan sisanya berjalan baik. Bu Rina ingin asesmen ini berfungsi formatif. Tindak lanjut yang paling tepat adalah ...`,o:[
+  `A. memasukkan seluruh hasil ke rapor dan menurunkan nilai program yang galat sebagai konsekuensi`,
+  `B. mengulang seluruh materi dari awal bagi seluruh kelas agar tidak ada murid tertinggal`,
+  `C. mengklasifikasikan jenis kesalahan, memberi umpan balik spesifik, lalu memberi kesempatan murid memperbaiki program dengan penanganan kasus tepi`,
+  `D. mengumumkan program terbaik di depan kelas sebagai contoh dan melanjutkan ke materi berikutnya`
+  ],k:"C"},
+
+  {s:"A",n:18,t:"pg",title:"PCK 18",q:`Pada awal semester, Pak Farhan menyiapkan asesmen diagnostik untuk kelas VII yang berasal dari beberapa SD dengan pengalaman komputer yang sangat beragam. Rancangan yang paling tepat adalah ...`,o:[
+  `A. tes pilihan ganda 40 butir tentang seluruh materi semester untuk memeringkat murid dan hasilnya dicatat sebagai nilai harian`,
+  `B. wawancara terbuka dengan seluruh murid satu per satu sehingga memerlukan beberapa minggu`,
+  `C. instrumen singkat yang memetakan prasyarat (logika dasar, keterampilan mengoperasikan perangkat) serta kesiapan dan akses perangkat di rumah, hasilnya dipakai merancang pembelajaran dan tidak dimasukkan ke nilai rapor`,
+  `D. angket minat saja karena kemampuan awal akan terlihat dengan sendirinya selama pembelajaran`
+  ],k:"C"},
+
+  {s:"A",n:19,t:"kat",title:"PCK 19",q:`Pak Dimas menyusun ujian praktik pemrograman dengan tujuan pembelajaran "merancang algoritma untuk menyelesaikan masalah". Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Soal pilihan ganda tentang penulisan tanda baca sintaks tidak selaras dengan tujuan tersebut, sehingga validitas isinya rendah.`,
+  `Dua guru yang memeriksa program dengan rubrik yang sama menghasilkan nilai yang jauh berbeda; hal ini menandakan perlunya kalibrasi rubrik dan penilai.`,
+  `Menambah jumlah butir soal pasti menjamin validitas asesmen.`,
+  `Asesmen yang reliabel pasti valid.`
+  ],k:[0,0,1,1]},
+
+  {s:"A",n:20,t:"mcma",title:"PCK 20",q:`Bu Retno memberi umpan balik atas kode murid kelas X. Pilih semua umpan balik yang tergolong berkualitas untuk mendukung belajar!`,o:[
+  `A. "Fungsi hitung_rata sudah benar, tetapi variabel total belum diatur ke nol di setiap pemanggilan. Coba telusuri nilainya untuk dua data berurutan."`,
+  `B. "Kode kamu masih jelek, perbaiki dan lebih rajin lagi."`,
+  `C. "Nilainya 70 karena kamu belum menguji kasus data kosong; kriteria pengujian ada di rubrik bagian 3."`,
+  `D. "Kamu pasti berbakat, sehingga tidak perlu belajar banyak untuk tugas berikutnya."`,
+  `E. "Bandingkan hasil programmu dengan rubrik; bagian mana yang menurutmu paling perlu diperbaiki dan apa langkah pertamamu?"`
+  ],k:["A","C","E"]},
+
+  {s:"A",n:21,t:"pg",title:"PCK 21",q:`Pak Johan menilai proyek situs web kelompok memakai rubrik holistik dengan satu skor 1 sampai 4. Murid mengeluh tidak tahu bagian mana yang harus diperbaiki, dan dua kelompok dengan skor sama ternyata memiliki kekurangan yang sangat berbeda. Perbaikan paling tepat adalah ...`,o:[
+  `A. menyusun rubrik analitik dengan kriteria fungsi, keterbacaan kode, antarmuka, dan dokumentasi, masing-masing dengan deskriptor tingkat capaian, lalu dibagikan sebelum proyek dimulai`,
+  `B. menambah rentang skor menjadi 1 sampai 10 agar perbedaan antar kelompok lebih halus`,
+  `C. menambah komentar singkat pada akhir penilaian tanpa mengubah rubrik`,
+  `D. meminta murid menilai satu sama lain tanpa kriteria agar mereka lebih jujur`
+  ],k:"A"},
+
+  {s:"A",n:22,t:"pg",title:"PCK 22",q:`Bu Mira ingin murid kelas IX memahami aliran paket data. Aliran ini sulit divisualisasikan melalui gambar statis. Ia memilih simulator jaringan karena memungkinkan murid mengubah konfigurasi dan mengamati dampaknya secara langsung, selaras dengan pendekatan inkuiri yang ia pakai. Alasan pemilihan teknologi tersebut menunjukkan ...`,o:[
+  `A. pengetahuan teknologi yang berdiri sendiri karena Bu Mira mengikuti perkembangan perangkat terbaru`,
+  `B. integrasi pengetahuan teknologi, pedagogi, dan konten karena pilihan alat didasarkan pada sifat materi dan strategi belajar`,
+  `C. pengetahuan pedagogi dan teknologi tanpa konten karena fokusnya pada penggunaan simulator`,
+  `D. pengetahuan konten dan teknologi tanpa pedagogi karena alat dipilih agar materi tampak menarik`
+  ],k:"B"},
+
+  {s:"A",n:23,t:"kat",title:"PCK 23",q:`Pak Gilang meninjau penggunaan teknologi pada materi pengolahan data di kelas XI memakai model SAMR. Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Mengubah lembar kerja kertas menjadi berkas PDF yang dibaca di ponsel tanpa perubahan fungsi termasuk tingkat Substitusi.`,
+  `Memakai rumus otomatis pada lembar sebar menggantikan perhitungan kalkulator tanpa mengubah tugas termasuk tingkat Modifikasi.`,
+  `Murid membuat dasbor data lingkungan sekolah, mempresentasikannya kepada komite sekolah, dan menerima masukan; tugas ini sulit terlaksana tanpa teknologi, sehingga mendekati Redefinisi.`,
+  `Modifikasi terjadi ketika teknologi hanya menggantikan alat lama tanpa perubahan fungsi.`
+  ],k:[0,1,0,1]},
+
+  {s:"A",n:24,t:"pg",title:"PCK 24",q:`Pada tugas membuat fungsi pencarian, Fira mengumpulkan kode yang berjalan benar. Ketika ditanya Pak Hasan mengapa ia memakai struktur perulangan tertentu, Fira tidak dapat menjelaskan dan mengaku kode diperoleh dari asisten AI. Sekolah belum memiliki kebijakan khusus. Tindakan yang paling tepat adalah ...`,o:[
+  `A. memberi nilai nol karena penggunaan AI pasti pelanggaran integritas akademik`,
+  `B. menerima karena hasilnya benar dan ia tampak memanfaatkan teknologi dengan baik`,
+  `C. menetapkan aturan bersama: penggunaan AI diperbolehkan dengan syarat mendokumentasikan perintah, menguji keluaran, dan menjelaskan atau memodifikasi kode dalam tanya jawab singkat sebagai bagian asesmen`,
+  `D. melarang seluruh penggunaan AI dan memeriksa kode murid dengan alat pendeteksi sebagai satu-satunya dasar keputusan`
+  ],k:"C"},
+
+  {s:"A",n:25,t:"mcma",title:"PCK 25",q:`Tim guru Informatika menyusun kebijakan kelas untuk penggunaan AI generatif pada tugas pemrograman. Pilih semua butir yang layak dimasukkan!`,o:[
+  `A. Keluaran AI harus diverifikasi dengan pengujian dan tidak boleh dianggap otomatis benar`,
+  `B. Murid tidak boleh memasukkan data pribadi atau data teman ke dalam alat AI`,
+  `C. Penggunaan AI wajib dinyatakan secara transparan pada laporan tugas`,
+  `D. Penilaian akhir sepenuhnya diserahkan kepada AI agar objektif`,
+  `E. Murid dilarang menggunakan AI di sekolah maupun di rumah dengan alasan apa pun`
+  ],k:["A","B","C"]},
+
+  {s:"A",n:26,t:"pg",title:"PCK 26",q:`Bu Tri mengajar di sebuah SMP di Yogyakarta dan ingin mengaitkan materi pengenalan pola dan algoritma dengan kearifan lokal. Ia mengajak murid mengamati motif batik parang yang berulang. Murid kemudian menguraikan satuan motif, menentukan aturan pengulangan dan pencerminannya, lalu menuliskannya sebagai prosedur menggambar dengan perulangan bersarang pada perangkat lunak berbasis blok. Penilaian utamanya adalah ketepatan aturan dan struktur algoritma. Pendekatan Bu Tri paling tepat dinilai sebagai ...`,o:[
+  `A. integrasi kearifan lokal yang substansial, karena motif dijadikan objek analisis untuk mencapai tujuan konsep algoritma`,
+  `B. integrasi kearifan lokal yang dangkal, karena batik hanya menjadi hiasan visual pada slide pembuka`,
+  `C. proyek kesenian, karena yang dinilai adalah keindahan hasil gambar motif`,
+  `D. pembelajaran sejarah, karena murid mempelajari asal-usul motif batik sebelum menggambar`
+  ],k:"A"},
+
+  {s:"A",n:27,t:"mcma",title:"PCK 27",q:`Sebuah SMP di pesisir mengalami pemadaman listrik berkala dan sinyal internet lemah. Pak Ardi harus mengajar analisis data dan jaringan. Pilih semua strategi yang memanfaatkan sumber belajar dan potensi lingkungan secara tepat!`,o:[
+  `A. Murid mengumpulkan dan menganalisis data pasang surut dan hasil tangkapan nelayan setempat sebagai konteks analisis data`,
+  `B. Pak Ardi menyiapkan paket materi dan perangkat lunak yang dapat dipakai tanpa jaringan, dan memakai aktivitas unplugged untuk konsep jaringan`,
+  `C. Pak Ardi menunda seluruh materi sampai sekolah memiliki internet yang stabil`,
+  `D. Murid diminta mengunduh seluruh bahan dari internet di rumah masing-masing sebagai prasyarat hadir di kelas`,
+  `E. Pak Ardi meminta murid menggambar topologi jaringan dari pengalaman mengamati jaringan kabel di kantor desa, lalu mengaitkannya dengan konsep topologi`
+  ],k:["A","B","E"]},
+
+  {s:"A",n:28,t:"pg",title:"PCK 28",q:`Murid kelas VII di sebuah desa terpencil belum pernah memakai internet. Bu Dewi akan mengenalkan konsep jaringan dan alamat. Ia memulai dengan analogi pengiriman surat melalui balai desa, lalu memetakan unsur-unsurnya: pengirim, penerima, alamat, kantor pengiriman. Setelah itu ia secara eksplisit membahas bagian-bagian yang analogi ini tidak berlaku, misalnya kecepatan dan pemecahan paket. Pendekatan Bu Dewi sudah tepat karena ...`,o:[
+  `A. analogi dari pengalaman yang dikenal murid menjembatani konsep abstrak, dan pembahasan batas analogi mencegah miskonsepsi baru`,
+  `B. analogi sebaiknya dipakai tanpa dibahas batasnya agar murid tidak bingung`,
+  `C. materi jaringan sebaiknya langsung memakai istilah teknis dan peragaan perangkat agar murid terbiasa`,
+  `D. pengalaman lokal sebaiknya tidak dipakai karena dapat menimbulkan salah paham tentang teknologi sebenarnya`
+  ],k:"A"},
+
+  {s:"A",n:29,t:"pg",title:"PCK 29",q:`Dalam latihan mengurutkan data [5, 3, 8, 1] dengan metode gelembung (bubble sort), Kevin menulis bahwa setelah putaran pertama hasilnya [1, 3, 5, 8]. Menurut Kevin, "satu putaran artinya satu kali seluruh data selesai diurutkan". Penelusuran yang benar menghasilkan [3, 5, 1, 8] setelah putaran pertama. Pernyataan yang menggambarkan miskonsepsi sekaligus perbaikan yang tepat adalah ...`,o:[
+  `A. Kevin keliru menukar elemen yang sama; guru perlu melatih Kevin menulis kondisi perbandingan lebih rapi`,
+  `B. Kevin menganggap satu putaran langsung mengurutkan seluruh data; guru meminta Kevin menelusuri setiap perbandingan pada pasangan berdekatan sehingga terlihat bahwa satu putaran menempatkan elemen terbesar pada posisi akhir`,
+  `C. Kevin menganggap satu putaran hanya memeriksa elemen pertama; guru meminta Kevin menghitung jumlah perbandingan di setiap putaran`,
+  `D. Kevin menganggap data harus diurutkan dari terbesar ke terkecil; guru menjelaskan urutan menaik dan menurun`
+  ],k:"B"},
+
+  {s:"A",n:30,t:"pg",title:"PCK 30",q:`Murid kelas XI membuat satu tabel "Siswa" berisi kolom nama, kelas, wali_kelas, dan ruang. Ketika wali kelas XI-A berganti, mereka harus mengubah 34 baris, dan satu baris terlewat sehingga datanya tidak konsisten. Bu Lestari ingin murid memahami normalisasi tanpa sekadar menghafal. Langkah pedagogis yang paling tepat adalah ...`,o:[
+  `A. menjelaskan definisi bentuk normal pertama sampai ketiga, lalu meminta murid menerapkannya pada tabel tersebut`,
+  `B. meminta murid membuka tabel pemecahan yang telah dibuat guru dan mencocokkannya dengan tabel mereka`,
+  `C. meminta murid mengganti nama kolom agar lebih jelas dan menambahkan kolom kunci utama`,
+  `D. meminta murid mengalami kembali anomali pembaruan tersebut, mengidentifikasi data yang berulang, lalu merancang pemecahan tabel yang menghilangkan pengulangan sebelum guru memperkenalkan istilah normalisasi`
+  ],k:"D"},
+
+  {s:"A",n:31,t:"pg",title:"PCK 31",q:`Dalam latihan mengonversi bilangan desimal 13 ke biner, Tika membagi 13 dengan 2 berulang kali, mencatat sisa 1, 0, 1, 1, lalu menulis hasilnya 1011. Tika yakin benar karena mengikuti prosedur. Cara menanggapi yang paling tepat adalah ...`,o:[
+  `A. menyatakan hasil Tika benar karena prosedurnya sudah dilakukan dengan lengkap`,
+  `B. meminta Tika menghitung ulang pembagian karena ada kekeliruan hasil bagi pada langkah kedua`,
+  `C. menjelaskan bahwa konversi biner ke desimal tidak perlu dilakukan karena hasilnya akan sama`,
+  `D. meminta Tika mengonversi 1011 kembali ke desimal sehingga ia menemukan hasilnya 11, bukan 13, lalu mendiskusikan bahwa sisa pembagian harus dibaca dari bawah ke atas`
+  ],k:"D"},
+
+  {s:"A",n:32,t:"mcma",title:"PCK 32",q:`Pak Rizal mengajak kelas X membahas kasus beredarnya foto hasil rekayasa yang menyebabkan reputasi seorang guru rusak di media sosial. Pilih semua rancangan pembelajaran yang tepat untuk mencapai tujuan "menganalisis dampak sosial informatika"!`,o:[
+  `A. Murid menelaah kasus, menelusuri sumber dan jejak penyebaran, serta menilai kredibilitas informasi`,
+  `B. Murid merumuskan pedoman bermedia digital bagi kelas dengan mempertimbangkan privasi dan hak orang lain`,
+  `C. Murid diminta menghafal pasal undang-undang dan sanksi pidana tanpa membahas kasus`,
+  `D. Murid mendiskusikan dampak pada pihak yang dirugikan dan peran mereka sebagai pengguna`,
+  `E. Murid dilarang memakai media sosial di sekolah dan tidak perlu membahas kasus tersebut`
+  ],k:["A","B","D"]},
+
+  {s:"A",n:33,t:"kat",title:"PCK 33",q:`Dalam unit keamanan informasi, murid mempelajari sandi Caesar dengan pergeseran 3 dan membandingkannya dengan teknik modern. Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Sandi Caesar dengan pergeseran tetap dapat dipecahkan dengan mencoba seluruh kemungkinan pergeseran.`,
+  `Analisis frekuensi huruf dapat membantu memecahkan sandi substitusi sederhana.`,
+  `Sandi Caesar layak dipakai melindungi data pembayaran karena memiliki kunci rahasia.`,
+  `Hashing sama dengan enkripsi karena keduanya dapat dikembalikan ke data semula dengan kunci.`
+  ],k:[0,0,1,1]},
+
+  {s:"A",n:34,t:"pg",title:"PCK 34",q:`Kelompok Aisyah menyajikan data suhu ruang kelas selama 30 hari dalam diagram lingkaran, dengan tiap hari berupa satu irisan. Diagram tersebut sulit dibaca. Pak Tono ingin murid memahami pemilihan visualisasi sesuai pertanyaan yang dijawab data. Umpan balik yang paling tepat adalah ...`,o:[
+  `A. menanyakan pertanyaan apa yang ingin dijawab; karena tujuannya melihat perubahan dari waktu ke waktu, diagram garis lebih sesuai, lalu minta murid membandingkan keterbacaan kedua diagram`,
+  `B. menyatakan bahwa diagram lingkaran tidak boleh dipakai untuk data apa pun karena selalu menyesatkan`,
+  `C. menyarankan menambah warna berbeda pada setiap irisan agar mudah dibedakan`,
+  `D. menyarankan diagram batang karena diagram batang lebih mudah dibuat dibanding diagram lain`
+  ],k:"A"},
+
+  {s:"A",n:35,t:"pg",title:"PCK 35",note:"Teks soal asli terpotong pada dokumen sumber. Berdasarkan kunci dan pembahasan, soal ini membahas tentang DNS dan IP Address.",q:`[Teks soal terpotong pada dokumen sumber]`,o:[
+  `A. Memeriksa konfigurasi DNS server karena ping ke IP berhasil namun nama domain gagal.`,
+  `B. Mengganti kabel UTP karena koneksi terputus total.`,
+  `C. Mengubah subnet mask agar berbeda jaringan.`,
+  `D. Mematikan firewall yang menghalangi koneksi.`
+  ],k:"A"},
+
+  {s:"A",n:36,t:"pg",title:"PCK 36",q:`Pak Seno menyusun alur tujuan pembelajaran (ATP). Ia mempertimbangkan prasyarat konsep, kesiapan murid hasil asesmen, dan konteks sekolah. Urutan yang paling tepat adalah ...`,o:[
+  `A. mengurutkan dari materi yang paling mudah diajarkan guru ke yang paling sulit`,
+  `B. mengurutkan berdasarkan tingkat kesulitan materi dari yang paling sulit agar murid terbiasa tantangan`,
+  `C. mengurutkan berdasarkan keterkaitan prasyarat konsep, kesiapan murid hasil asesmen awal, dan konteks serta sumber daya sekolah`,
+  `D. mengurutkan berdasarkan kemudahan guru menyiapkan bahan agar jadwal terpenuhi`
+  ],k:"C"},
+
+  {s:"A",n:37,t:"mcma",title:"PCK 37",q:`Pak Wahyu menulis beberapa rumusan tujuan pembelajaran untuk materi algoritma percabangan. Pilih semua rumusan yang memuat kompetensi dan lingkup materi serta dapat diukur!`,o:[
+  `A. Murid dapat merancang algoritma percabangan bersyarat ganda untuk menyelesaikan masalah penentuan tarif parkir`,
+  `B. Murid memahami algoritma percabangan`,
+  `C. Murid dapat menelusuri alur eksekusi program percabangan bersarang dan menentukan keluarannya untuk data uji tertentu`,
+  `D. Guru menjelaskan tiga jenis percabangan kepada murid`,
+  `E. Murid dapat menguji program percabangan dengan data batas dan memperbaiki kesalahan logika yang ditemukan`
+  ],k:["A","C","E"]},
+
+  {s:"A",n:38,t:"kat",title:"PCK 38",q:`Dalam rapat Komunitas Praktik, guru membahas pengelolaan perencanaan pembelajaran Informatika yang adaptif dan kontekstual. Tentukan Sesuai atau Tidak Sesuai setiap pernyataan berikut!`,labels:["Sesuai","Tidak Sesuai"],st:[
+  `Perencanaan pembelajaran dapat direvisi berdasarkan hasil asesmen formatif dan kondisi kelas.`,
+  `Guru wajib mengikuti urutan bab buku teks persis, walaupun tujuan pembelajaran dapat dicapai melalui urutan lain.`,
+  `Guru dapat menyesuaikan konteks dan aktivitas sepanjang tujuan pembelajaran tetap tercapai.`,
+  `Perubahan rancangan hanya boleh dilakukan setelah pergantian tahun ajaran.`
+  ],k:[0,1,0,1]},
+
+  {s:"A",n:39,t:"pg",title:"PCK 39",q:`Pak Arman merancang proyek di SMP: murid menelaah aplikasi rekomendasi video, menyelidiki bagaimana data memengaruhi rekomendasi, mengidentifikasi potensi bias, dan menyusun argumen tertulis tentang dampaknya terhadap pilihan pengguna. Dimensi Profil Lulusan yang paling menonjol pada kegiatan ini adalah ...`,o:[
+  `A. kewargaan`,
+  `B. penalaran kritis`,
+  `C. kreativitas`,
+  `D. kolaborasi`
+  ],k:"B"},
+
+  {s:"A",n:40,t:"mcma",title:"PCK 40",q:`Berikut pasangan kegiatan dan dimensi Profil Lulusan pada unit proyek Informatika SMA. Pilih semua pasangan yang tepat!`,o:[
+  `A. Murid membagi peran dan mengelola konflik saat membuat aplikasi bersama, sebagai dimensi kolaborasi`,
+  `B. Murid menyusun jadwal kerja dan memantau kemajuan sendiri, sebagai dimensi kemandirian`,
+  `C. Murid menghafalkan sintaks bahasa pemrograman, sebagai dimensi kreativitas`,
+  `D. Murid menjelaskan hasil proyek kepada pengguna dengan bahasa yang mudah dipahami, sebagai dimensi komunikasi`,
+  `E. Murid membuat jadwal piket kebersihan lab, sebagai dimensi kesehatan fisik semata`
+  ],k:["A","B","D"]},
+
+  {s:"A",n:41,t:"pg",title:"PCK 41",q:`Tim lesson study sekolah melaksanakan open class pembelajaran Informatika. Dalam sesi refleksi, observer berkomentar, "Guru kurang menarik dan suaranya pelan." Fasilitator ingin sesi refleksi berfokus pada pembelajaran murid. Tindakan fasilitator yang paling tepat adalah ...`,o:[
+  `A. membiarkan komentar tersebut karena observer berhak menilai guru model`,
+  `B. mengarahkan observer menyampaikan bukti pembelajaran murid yang teramati, misalnya kapan murid kesulitan atau menemukan pemahaman, serta kondisi yang memengaruhinya`,
+  `C. menghentikan sesi refleksi dan meminta guru model memperbaiki cara mengajarnya terlebih dahulu`,
+  `D. meminta observer mengganti fokus pada kelengkapan administrasi guru`
+  ],k:"B"},
+
+  {s:"A",n:42,t:"mcma",title:"PCK 42",q:`Bu Ayu menemukan bahwa banyak murid kelas X kesulitan menelusuri kesalahan program. Ia ingin memperbaiki praktiknya melalui penelitian tindakan kelas. Pilih semua langkah yang tepat!`,o:[
+  `A. Mengumpulkan data awal, misalnya jenis kesalahan yang paling sering muncul dan catatan observasi`,
+  `B. Merancang tindakan, misalnya latihan debugging terstruktur dengan lembar panduan, dan menetapkan indikator keberhasilan`,
+  `C. Langsung menerapkan strategi yang sedang populer tanpa data awal`,
+  `D. Melakukan refleksi terhadap hasil, lalu menyusun siklus berikutnya bila indikator belum tercapai`,
+  `E. Menyimpulkan keberhasilan berdasarkan kesan guru semata tanpa membandingkan data`
+  ],k:["A","B","D"]},
+
+  {s:"A",n:43,t:"pg",title:"PCK 43",q:`Dalam laporan PPL, seorang calon guru menemukan 70 persen murid mencapai tujuan pembelajaran, tetapi 12 murid kesulitan menelusuri kesalahan program. Catatan observasi menunjukkan murid tidak memiliki strategi sistematis, dan waktu latihan habis untuk menulis kode awal. Rencana tindak lanjut (RTL) yang paling tepat adalah ...`,o:[
+  `A. menambah jumlah soal latihan pada pertemuan berikutnya agar murid terbiasa`,
+  `B. menyimpulkan bahwa 12 murid tersebut kurang motivasi dan memberikan nasihat belajar lebih giat`,
+  `C. mengganti seluruh model pembelajaran dengan model lain yang lebih baru tanpa mengkaji penyebab`,
+  `D. menyusun latihan debugging bertahap dengan strategi eksplisit (menebak, menelusuri, menguji), menyesuaikan alokasi waktu, menetapkan indikator keberhasilan, serta menjadwalkan uji coba dan refleksi bersama guru pamong`
+  ],k:"D"},
+
+  {s:"A",n:44,t:"kat",title:"PCK 44",q:`Calon guru menyusun refleksi kritis atas pelaksanaan PPL. Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Refleksi yang baik mengaitkan peristiwa di kelas dengan teori dan bukti.`,
+  `Refleksi cukup mendeskripsikan perasaan senang atau kecewa selama mengajar.`,
+  `Merumuskan beberapa kemungkinan penyebab sebelum memutuskan perbaikan merupakan bagian refleksi kritis.`,
+  `Hasil refleksi sebaiknya tidak didiskusikan dengan guru pamong karena bersifat subjektif.`
+  ],k:[0,1,0,1]},
+
+  {s:"A",n:45,t:"pg",title:"PCK 45",q:`Dimas kelas XI belum dapat menulis fungsi rekursif faktorial sendirian. Ketika berdiskusi dengan teman yang lebih mahir dan diberi petunjuk bertahap, ia dapat menyelesaikannya. Pak Hendra ingin memperkuat kemampuan Dimas tanpa membuatnya bergantung. Tindakan yang paling sesuai dengan teori Vygotsky adalah ...`,o:[
+  `A. memberikan solusi lengkap agar Dimas melihat contoh yang benar`,
+  `B. membiarkan Dimas mencoba sendiri sampai berhasil tanpa campur tangan`,
+  `C. memberi tugas yang lebih mudah untuk seluruh pertemuan berikutnya sampai Dimas percaya diri`,
+  `D. memberi petunjuk bertahap yang secara perlahan dikurangi, dan meminta Dimas menjelaskan langkahnya kepada teman`
+  ],k:"D"},
+
+  {s:"A",n:46,t:"pg",title:"PCK 46",q:`Untuk mengajarkan struktur data tumpukan (stack), Bu Rani mula-mula meminta murid menumpuk dan mengambil buku di meja, kemudian menggambar diagram tumpukan dengan panah masuk dan keluar, dan terakhir menulis operasi push dan pop dalam kode. Urutan tersebut sesuai dengan tahapan representasi Bruner, yaitu ...`,o:[
+  `A. ikonik, enaktif, simbolik`,
+  `B. simbolik, ikonik, enaktif`,
+  `C. enaktif, ikonik, simbolik`,
+  `D. enaktif, simbolik, ikonik`
+  ],k:"C"},
+
+  {s:"A",n:47,t:"pg",title:"PCK 47",q:`Murid menulis program penentuan predikat: jika nilai ≥ 60 maka "Cukup", jika tidak dan nilai ≥ 80 maka "Baik". Murid yakin program benar. Pak Gilang meminta mereka menguji nilai 85, dan hasilnya "Cukup". Murid terkejut dan mulai bertanya. Peristiwa ini paling sesuai dengan penjelasan ...`,o:[
+  `A. konstruktivisme sosial: pengetahuan dibangun melalui bantuan orang yang lebih mahir pada zona perkembangan proksimal`,
+  `B. behaviorisme operan: perilaku berubah karena penguatan setelah respons`,
+  `C. konstruktivisme kognitif: ketidakseimbangan antara skema lama dan pengalaman baru mendorong akomodasi skema`,
+  `D. pembelajaran sosial: murid belajar dengan meniru model yang diamati`
+  ],k:"C"},
+
+  {s:"A",n:48,t:"kat",title:"PCK 48",q:`Pak Rudi memberi pujian segera setelah murid berhasil memperbaiki program yang galat, memperagakan cara berpikir keras (think aloud) saat debugging, dan memberi pilihan topik proyek. Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Pujian segera setelah perilaku yang diharapkan sesuai dengan prinsip penguatan positif pada behaviorisme.`,
+  `Memperagakan berpikir keras lalu meminta murid meniru strategi sesuai dengan pembelajaran observasional Bandura.`,
+  `Memberi pilihan topik proyek mendukung kebutuhan otonomi, yang berkaitan dengan motivasi intrinsik.`,
+  `Menurut Bandura, efikasi diri hanya dibentuk oleh hadiah dan hukuman eksternal.`
+  ],k:[0,0,0,1]},
+
+  {s:"A",n:49,t:"pg",title:"PCK 49",q:`Pak Yusuf membuat video penjelasan algoritma pengurutan dengan teks panjang di layar, narasi yang cepat, dan animasi berjalan bersamaan. Murid kelas IX mengaku kewalahan dan tidak ingat langkahnya. Perbaikan yang paling sesuai dengan teori beban kognitif adalah ...`,o:[
+  `A. memperpanjang durasi video dan menambah detail teks agar penjelasan lengkap`,
+  `B. mengurangi beban ekstrinsik dengan membagi video menjadi segmen pendek, menghapus teks yang mengulang narasi, dan memakai contoh kerja bertahap`,
+  `C. menambah musik latar dan efek suara agar murid lebih tertarik`,
+  `D. mengganti dengan tes tertulis agar murid terpaksa mengingat langkahnya`
+  ],k:"B"},
+
+  {s:"A",n:50,t:"mcma",title:"PCK 50",q:`Pak Sandi ingin tugas pada materi algoritma menuntut kemampuan berpikir tingkat tinggi (menganalisis, mengevaluasi, mencipta). Pilih semua tugas yang sesuai!`,o:[
+  `A. Murid menyebutkan lima langkah pembuatan algoritma sesuai buku`,
+  `B. Murid membandingkan efisiensi dua algoritma pengurutan menggunakan data uji dan menyimpulkan mana yang lebih sesuai untuk kasus tertentu`,
+  `C. Murid menyalin ulang kode contoh ke buku latihan`,
+  `D. Murid merancang algoritma baru untuk menjadwalkan piket kelas dengan batasan yang mereka tetapkan`,
+  `E. Murid mengkritisi kode teman berdasarkan kriteria keterbacaan dan efisiensi lalu mengusulkan perbaikan`
+  ],k:["B","D","E"]},
+
+  /* ================= BAGIAN B: PEDAGOGI UMUM ================= */
+  {s:"B",n:1,t:"pg",title:"PU 1",q:`Pak Hasan meminta murid kelas VIII menilai kode mereka sendiri memakai rubrik sebelum dikumpulkan, menulis jurnal singkat tentang bagian yang paling sulit, dan menetapkan satu target perbaikan untuk tugas berikutnya. Guru tidak memberi nilai untuk kegiatan ini, tetapi membaca jurnal untuk menyesuaikan pembelajaran. Kegiatan ini paling tepat disebut ...`,o:[
+  `A. asesmen sebagai pembelajaran (assessment as learning), karena murid aktif memantau dan mengatur proses belajarnya`,
+  `B. asesmen untuk pembelajaran (assessment for learning), karena hasilnya hanya dipakai guru dan tidak melibatkan murid dalam memantau belajarnya`,
+  `C. asesmen dari pembelajaran (assessment of learning), karena hasilnya merangkum capaian murid di akhir unit`,
+  `D. asesmen diagnostik, karena dilakukan sebelum pembelajaran dimulai untuk memetakan kemampuan awal`
+  ],k:"A"},
+
+  {s:"B",n:2,t:"pg",title:"PU 2",q:`Bu Maya menerima murid pindahan yang pada minggu pertama tampak murung dan sering tidak menyelesaikan tugas. Asesmen diagnostik kognitif menunjukkan kemampuannya setara kelas. Melalui percakapan dan instrumen non-kognitif, diketahui ia baru kehilangan tempat tinggal akibat bencana. Tindak lanjut yang paling tepat adalah ...`,o:[
+  `A. menurunkan standar penilaian untuk murid tersebut sampai kondisinya pulih tanpa berkoordinasi dengan pihak lain`,
+  `B. tetap menuntut tugas yang sama dan memberikan nilai apa adanya agar adil`,
+  `C. menyimpulkan bahwa murid memiliki kesulitan belajar dan merujuknya untuk tes kecerdasan`,
+  `D. berkoordinasi dengan wali kelas dan guru bimbingan konseling untuk dukungan psikososial, menyesuaikan tuntutan tugas secara fleksibel, dan memantau kemajuan secara berkala`
+  ],k:"D"},
+
+  {s:"B",n:3,t:"kat",title:"PU 3",q:`Bu Ratih mengkaji penggunaan berbagai jenis asesmen di kelasnya. Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Hasil asesmen sumatif juga dapat dipakai untuk merefleksikan dan memperbaiki pembelajaran berikutnya.`,
+  `Asesmen formatif harus selalu menghasilkan nilai yang dimasukkan ke rapor.`,
+  `Umpan balik formatif lebih bermanfaat bila diberikan saat murid masih dapat memperbaiki pekerjaannya.`,
+  `Asesmen diagnostik hanya dilaksanakan sekali pada akhir tahun ajaran.`
+  ],k:[0,1,0,1]},
+
+  {s:"B",n:4,t:"pg",title:"PU 4",q:`Beberapa murid kelas VII di sebuah SMP sering mengantuk dan sulit berkonsentrasi pada jam pertama karena belum sarapan. Pak Dedi sudah menyiapkan kegiatan menarik, tetapi murid tetap tidak fokus. Menurut teori kebutuhan Maslow, langkah paling tepat adalah ...`,o:[
+  `A. menambah tantangan intelektual agar kebutuhan aktualisasi diri murid terpenuhi dan rasa kantuk berkurang`,
+  `B. mengarahkan murid pada kegiatan kelompok agar kebutuhan penghargaan terpenuhi`,
+  `C. mengomunikasikan dengan wali kelas dan sekolah untuk mencari dukungan pemenuhan kebutuhan dasar, misalnya program sarapan atau kerja sama dengan orang tua, sebelum menaikkan tuntutan akademik`,
+  `D. memberi hukuman bagi murid yang mengantuk agar disiplin`
+  ],k:"C"},
+
+  {s:"B",n:5,t:"mcma",title:"PU 5",q:`Seorang murid berkata, "Saya memang tidak bisa pemrograman, tidak ada gunanya mencoba lagi." Pilih semua tanggapan guru yang mendukung pola pikir bertumbuh (growth mindset)!`,o:[
+  `A. "Kamu belum menguasainya sekarang. Mari kita lihat strategi yang membuat bagian awal tadi berhasil."`,
+  `B. "Memang tidak semua orang berbakat di bidang ini, jadi tidak apa-apa."`,
+  `C. "Kesalahan program tadi memberi petunjuk tentang bagian yang perlu dilatih; coba tentukan satu langkah kecil berikutnya."`,
+  `D. "Teman-temanmu sudah bisa, kamu seharusnya malu."`,
+  `E. "Kemarin kamu berhasil memperbaiki dua kesalahan. Apa yang kamu lakukan sehingga berhasil?"`
+  ],k:["A","C","E"]},
+
+  {s:"B",n:6,t:"pg",title:"PU 6",q:`Pada kelas VII dengan 36 murid, asesmen sederhana menunjukkan kemampuan membaca dan memahami teks petunjuk sangat beragam. Bu Fitri menetapkan sesi TaRL tiga kali seminggu selama 40 menit, mengelompokkan murid berdasarkan hasil asesmen, dan memberi aktivitas sesuai tingkat capaian. Setelah empat minggu, asesmen ulang menunjukkan sebagian murid siap pindah kelompok. Rangkaian yang dilakukan Bu Fitri menggambarkan ...`,o:[
+  `A. diferensiasi produk karena murid memilih bentuk hasil belajar sendiri`,
+  `B. pembelajaran kooperatif karena murid belajar dalam kelompok`,
+  `C. TaRL karena pengelompokan berbasis capaian, aktivitas sesuai tingkat, dan pemantauan berkala yang memungkinkan perpindahan`,
+  `D. remedial klasikal karena seluruh murid mengulang materi yang sama`
+  ],k:"C"},
+
+  {s:"B",n:7,t:"pg",title:"PU 7",q:`Di kelas Pak Anton terdapat murid dengan hambatan penglihatan sebagian (low vision). Pak Anton biasa menjelaskan melalui slide berisi grafik berwarna tipis dan menugaskan laporan tertulis. Ia ingin menerapkan DUP. Perubahan yang paling sesuai adalah ...`,o:[
+  `A. menyiapkan satu versi slide khusus untuk murid tersebut dan tetap memakai slide asli untuk murid lain`,
+  `B. menyediakan beragam bentuk penyajian (slide kontras tinggi dengan teks alternatif, penjelasan lisan, bahan taktual atau digital yang dapat diperbesar) dan beragam bentuk ekspresi (laporan, rekaman lisan, presentasi) untuk semua murid`,
+  `C. meminta murid duduk paling depan dan membaca sendiri materi dari buku dengan huruf lebih besar`,
+  `D. memberi tugas lisan hanya kepada murid tersebut karena ia tidak mampu menulis laporan`
+  ],k:"B"},
+
+  {s:"B",n:8,t:"kat",title:"PU 8",q:`Guru-guru di sekolah mendiskusikan pembelajaran berdiferensiasi. Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Diferensiasi berarti guru menyusun rencana pembelajaran terpisah sepenuhnya untuk setiap murid.`,
+  `Diferensiasi dapat didasarkan pada kesiapan, minat, dan profil belajar murid.`,
+  `Tujuan pembelajaran dapat sama, sedangkan jalur dan dukungan untuk mencapainya berbeda.`,
+  `Diferensiasi hanya dilakukan untuk murid berkebutuhan khusus.`
+  ],k:[1,0,0,1]},
+
+  {s:"B",n:9,t:"pg",title:"PU 9",q:`Bu Nia mengajar kelas X di wilayah pertanian. Ia menugaskan murid memetakan alur penjualan hasil panen di desa menjadi data yang dapat diolah. Ia mencontohkan cara menyusun tabel pada satu komoditas, lalu murid mengerjakan komoditas lain secara berkelompok dan saling memberi masukan. Pada kegiatan ini, guru yang mencontohkan cara menyusun tabel merupakan komponen CTL ...`,o:[
+  `A. pemodelan (modeling)`,
+  `B. inkuiri (inquiry)`,
+  `C. bertanya (questioning)`,
+  `D. masyarakat belajar (learning community)`
+  ],k:"A"},
+
+  {s:"B",n:10,t:"pg",title:"PU 10",q:`Dua guru merancang pembelajaran tentang pengelolaan air di sekolah. Guru A menyajikan masalah nyata yang belum jelas pemecahannya dan menuntut murid menyelidiki penyebab serta solusi; produk akhirnya fleksibel. Guru B menetapkan produk yang jelas, yaitu prototipe sistem penampungan air, lengkap dengan jadwal dan tahapan pembuatan. Perbedaan fokus kedua rancangan paling tepat dinyatakan sebagai ...`,o:[
+  `A. Guru A menerapkan PjBL dan Guru B menerapkan PBL karena keduanya memakai masalah nyata`,
+  `B. Guru A menerapkan PBL dengan fokus pemecahan masalah, sedangkan Guru B menerapkan PjBL dengan fokus pada produk dan proses pembuatannya`,
+  `C. Keduanya PBL karena PjBL tidak memerlukan masalah nyata`,
+  `D. Keduanya PjBL karena keduanya menghasilkan solusi`
+  ],k:"B"},
+
+  {s:"B",n:11,t:"pg",title:"PU 11",q:`Rio sering membentak teman saat kegiatan kelompok. Ketika Bu Lina bertanya, ia menjawab, "Saya tidak tahu mengapa tiba-tiba saya jadi begitu." Bu Lina ingin memperkuat kompetensi sosial dan emosional Rio. Berdasarkan kerangka CASEL, kompetensi yang perlu diperkuat lebih dahulu adalah ...`,o:[
+  `A. kesadaran diri (self-awareness), agar Rio mampu mengenali dan menamai emosinya`,
+  `B. manajemen diri (self-management), agar Rio mampu menenangkan diri`,
+  `C. keterampilan berelasi (relationship skills), agar Rio mampu bekerja sama`,
+  `D. pengambilan keputusan yang bertanggung jawab (responsible decision-making), agar Rio memilih tindakan yang tepat`
+  ],k:"A"},
+
+  {s:"B",n:12,t:"mcma",title:"PU 12",q:`Sekolah ingin mengintegrasikan pembelajaran sosial emosional (PSE) ke dalam pembelajaran sehari-hari. Pilih semua praktik yang tepat!`,o:[
+  `A. Kegiatan singkat memeriksa kondisi perasaan murid di awal pelajaran`,
+  `B. Penyusunan norma kelas bersama dengan murid`,
+  `C. Satu ceramah tentang emosi per semester sebagai satu-satunya kegiatan PSE`,
+  `D. Pembelajaran kooperatif dengan peran jelas dan refleksi tentang cara bekerja sama`,
+  `E. Menegur murid secara terbuka di depan kelas agar menjadi contoh bagi yang lain`
+  ],k:["A","B","D"]},
+
+  {s:"B",n:13,t:"pg",title:"PU 13",q:`Di kelas Bu Santi, murid dilibatkan memutuskan aturan kelas, diberi kesempatan memimpin proyek sesuai minat, dan mendapat pengakuan atas usaha dan prestasinya. Murid merasa mampu mengembangkan diri dan dihargai. Dalam kerangka school well-being, aspek yang paling menonjol adalah ...`,o:[
+  `A. Having, yaitu kondisi sekolah seperti ruang, sarana, dan layanan`,
+  `B. Loving, yaitu hubungan sosial dan iklim relasi di sekolah`,
+  `C. Being, yaitu pemenuhan diri melalui partisipasi, penghargaan, dan kesempatan berkembang`,
+  `D. Health, yaitu kondisi kesehatan fisik dan mental murid`
+  ],k:"C"},
+
+  {s:"B",n:14,t:"kat",title:"PU 14",q:`Kepala sekolah menyusun program peningkatan kesejahteraan murid. Tentukan apakah masing-masing program berikut Sesuai atau Tidak Sesuai sebagai peningkatan aspek Having pada school well-being!`,labels:["Sesuai","Tidak Sesuai"],st:[
+  `Memperbaiki pencahayaan dan ventilasi ruang kelas.`,
+  `Memprogramkan kakak asuh untuk mempererat hubungan antar murid.`,
+  `Menyediakan layanan konseling dan layanan kesehatan sekolah yang mudah diakses.`,
+  `Memberi kesempatan murid memimpin proyek dan memperoleh pengakuan atas prestasinya.`
+  ],k:[0,1,0,1]},
+
+  {s:"B",n:15,t:"pg",title:"PU 15",q:`Dalam jurnal refleksinya, Pak Joko menulis, "Diskusi hari ini gagal karena murid pasif." Ia ingin refleksinya lebih kritis dan mendorong perbaikan. Pertanyaan pemandu yang paling tepat untuk ditambahkan adalah ...`,o:[
+  `A. "Mengapa murid begitu malas dan bagaimana menghukum mereka agar aktif?"`,
+  `B. "Bukti apa yang menunjukkan murid pasif, asumsi apa yang saya pegang tentang diskusi, dan penjelasan lain apa yang mungkin?"`,
+  `C. "Apakah saya sudah cukup bersemangat saat mengajar hari ini?"`,
+  `D. "Bagaimana agar diskusi esok hari terlihat lebih ramai bagi pengamat?"`
+  ],k:"B"},
+
+  {s:"B",n:16,t:"pg",title:"PU 16",q:`Pak Doni menggunggah tangkapan layar nilai ujian murid lengkap dengan nama ke grup pesan kelas untuk memotivasi murid yang nilainya rendah. Beberapa orang tua berkeberatan. Perilaku yang paling mencerminkan keteladanan etis dalam situasi ini adalah ...`,o:[
+  `A. menjelaskan bahwa tindakan itu untuk memotivasi dan tidak perlu diubah selama murid tidak keberatan`,
+  `B. menghapus unggahan, meminta maaf, memberi tahu orang tua, dan beralih ke umpan balik pribadi untuk setiap murid`,
+  `C. menghapus unggahan tanpa menyampaikan apa pun agar tidak memperpanjang masalah`,
+  `D. mengganti nama murid dengan inisial tetapi tetap mengunggah daftar nilai kelas`
+  ],k:"B"},
+
+  {s:"B",n:17,t:"mcma",title:"PU 17",q:`Dalam kode etik profesi, guru harus menunjukkan integritas dan keteladanan. Pilih semua perilaku yang mencerminkannya!`,o:[
+  `A. Menolak permintaan orang tua untuk menaikkan nilai sebagai imbalan hadiah`,
+  `B. Mengakui kesalahan penilaian di depan murid dan memperbaikinya`,
+  `C. Menerapkan aturan kelas secara konsisten kepada seluruh murid`,
+  `D. Menyebarkan keburukan rekan guru agar murid tidak meniru`,
+  `E. Menggunakan karya murid untuk keperluan pribadi tanpa meminta izin`
+  ],k:["A","B","C"]},
+
+  {s:"B",n:18,t:"pg",title:"PU 18",q:`Banyak murid tidak sempat bertanya. Bu Wati merasa kecewa dan berpikir, "Saya memang tidak berbakat mengajar." Sikap yang paling mencerminkan pola pikir bertumbuh dan belajar sepanjang hayat adalah ...`,o:[
+  `A. menganggap catatan tersebut subjektif dan tetap mengajar dengan cara yang sama`,
+  `B. menerima catatan sebagai informasi perbaikan, merumuskan satu atau dua strategi (jeda tanya, cek pemahaman), mencobanya, dan meminta observasi ulang`,
+  `C. mengajukan pindah tugas ke jenjang lain agar terhindar dari kritik`,
+  `D. meminta supervisor memberikan skor tinggi agar semangat mengajar pulih`
+  ],k:"B"},
+
+  {s:"B",n:19,t:"kat",title:"PU 19",q:`Pak Sigit mendapati Anton menyontek saat ujian praktik. Anton adalah murid berprestasi yang mewakili sekolah dalam lomba. Aturan sekolah mengatur konsekuensi yang telah disosialisasikan. Tentukan Sesuai atau Tidak Sesuai setiap keputusan Pak Sigit berikut dengan prinsip pengambilan keputusan yang konsisten dan mendidik!`,labels:["Sesuai","Tidak Sesuai"],st:[
+  `Menerapkan konsekuensi yang telah disepakati dan disosialisasikan, disertai dialog pembinaan.`,
+  `Meringankan konsekuensi karena Anton berprestasi agar reputasi sekolah terjaga.`,
+  `Mendengarkan kronologi dan menelusuri faktor penyebab sebelum menetapkan tindak lanjut.`,
+  `Memberi hukuman fisik agar murid jera.`
+  ],k:[0,1,0,1]},
+
+  {s:"B",n:20,t:"pg",title:"PU 20",q:`Di kelas Bu Dian terdapat murid dengan hambatan pendengaran yang dibantu alat bantu dengar dan membaca gerak bibir. Bu Dian sering menjelaskan sambil membelakangi murid untuk menulis di papan. Penyesuaian komunikasi yang paling tepat adalah ...`,o:[
+  `A. menghadap kelas saat berbicara, memakai bahan visual dan ringkasan tertulis, mengecek pemahaman, dan memastikan murid dapat melihat wajah guru`,
+  `B. meminta murid duduk paling belakang agar tidak mengganggu`,
+  `C. meminta teman sebangku menjelaskan ulang seluruh materi sepanjang pelajaran`,
+  `D. berbicara lebih keras tanpa mengubah posisi atau cara penyampaian`
+  ],k:"A"},
+
+  {s:"B",n:21,t:"pg",title:"PU 21",q:`Seorang orang tua menyampaikan keberatan karena anaknya bermain permainan edukatif pada pelajaran Informatika, menurutnya hal itu membuang waktu. Bu Karin ingin tetap menjaga hubungan dan kualitas pembelajaran. Langkah yang paling tepat adalah ...`,o:[
+  `A. menunjukkan tujuan pembelajaran, bukti hasil belajar anak, dan cara kegiatan itu mendukung tujuan; mendengarkan kekhawatiran orang tua dan membuka kesempatan mengamati kelas`,
+  `B. menyampaikan bahwa keputusan pembelajaran sepenuhnya urusan guru dan orang tua tidak perlu ikut campur`,
+  `C. menghentikan kegiatan tersebut seterusnya agar orang tua tidak komplain`,
+  `D. meminta anak menjelaskan sendiri kepada orang tuanya tanpa ada komunikasi guru`
+  ],k:"A"},
+
+  {s:"B",n:22,t:"mcma",title:"PU 22",q:`Seorang murid kelas IX sering tidak masuk sekolah dan prestasinya menurun. Wali kelas ingin menangani kasus ini secara kolaboratif. Pilih semua langkah yang tepat!`,o:[
+  `A. Berkoordinasi dengan guru BK untuk menelusuri faktor penyebab`,
+  `B. Berkomunikasi dengan orang tua atau wali untuk memahami kondisi di rumah`,
+  `C. Berkoordinasi dengan tenaga kependidikan dan guru mata pelajaran untuk menyusun dukungan akademik`,
+  `D. Mengumumkan nama murid di papan pengumuman agar menjadi peringatan`,
+  `E. Menyerahkan penanganan sepenuhnya kepada murid tanpa komunikasi dengan pihak lain`
+  ],k:["A","B","C"]},
+
+  {s:"B",n:23,t:"pg",title:"PU 23",q:`Pak Rahman aktif dalam MGMP Informatika tingkat kabupaten. Pada pertemuan terakhir, anggota hanya mendengarkan paparan narasumber. Pak Rahman ingin MGMP lebih berdampak terhadap praktik mengajar anggota. Usulan yang paling tepat adalah ...`,o:[
+  `A. menambah jumlah narasumber dan durasi paparan agar materi lebih lengkap`,
+  `B. mengganti pertemuan menjadi daring penuh agar lebih murah`,
+  `C. menjadikan pertemuan sebagai forum berbagi praktik baik, membahas studi kasus pembelajaran, dan melakukan pengamatan sejawat dengan tindak lanjut di sekolah masing-masing`,
+  `D. memusatkan kegiatan pada penyusunan laporan administrasi anggota`
+  ],k:"C"},
+
+  {s:"B",n:24,t:"pg",title:"PU 24",q:`Pak Heru mendampingi murid menyusun proyek. Pada awal proyek ia memberi contoh dan penuntun, kemudian berada di tengah kelompok membangun semangat kerja sama. Ketika murid telah mampu, ia berdiri di belakang, memberi dorongan, dan membiarkan murid memimpin. Sikap guru yang memberi dorongan dari belakang saat murid mampu mandiri sesuai dengan semboyan ...`,o:[
+  `A. ing ngarsa sung tuladha`,
+  `B. ing madya mangun karsa`,
+  `C. tut wuri handayani`,
+  `D. ing ngarsa sung tuladha dan ing madya mangun karsa secara bersamaan`
+  ],k:"C"},
+
+  {s:"B",n:25,t:"kat",title:"PU 25",q:`Dalam diskusi pengembangan kompetensi guru, dibahas gagasan Ki Hadjar Dewantara tentang Sistem Among. Tentukan Benar atau Salah setiap pernyataan berikut!`,labels:["Benar","Salah"],st:[
+  `Sistem Among menuntun anak tumbuh sesuai kodratnya dengan guru sebagai pamong.`,
+  `Sistem Among menolak peran guru karena anak dianggap dapat belajar sepenuhnya sendiri.`,
+  `Ing madya mangun karsa menggambarkan guru berada di tengah murid untuk membangun semangat dan kolaborasi.`,
+  `Tut wuri handayani berarti guru membiarkan murid tanpa bimbingan sama sekali.`
+  ],k:[0,1,0,1]},
+
+  {s:"B",n:26,t:"pg",title:"PU 26",q:`Bu Sari mengundang petani setempat sebagai narasumber untuk menjelaskan pencatatan hasil panen, mengajak orang tua membantu murid mengumpulkan data di rumah, dan bekerja sama dengan kantor desa menyediakan data luas lahan. Dalam kerangka pembelajaran mendalam, kegiatan ini terutama mencerminkan ...`,o:[
+  `A. praktik pedagogis`,
+  `B. lingkungan pembelajaran`,
+  `C. pemanfaatan digital`,
+  `D. kemitraan pembelajaran`
+  ],k:"D"},
+
+  {s:"B",n:27,t:"pg",title:"PU 27",q:`Seorang murid menjadi korban perundungan di grup percakapan kelas dan enggan masuk sekolah. Langkah pertama yang paling tepat dari guru yang menerima laporan adalah ...`,o:[
+  `A. memanggil seluruh anggota grup ke ruang guru dan menghukum mereka tanpa klarifikasi`,
+  `B. menyarankan murid keluar dari grup dan tidak memikirkannya lagi`,
+  `C. mendengarkan korban dengan tenang, memastikan rasa aman, menyimpan bukti, lalu melaporkan kepada tim pencegahan dan penanganan kekerasan serta wali kelas untuk tindak lanjut sesuai prosedur`,
+  `D. menunggu sampai ada korban lain sebelum melapor agar bukti lebih banyak`
+  ],k:"C"},
+
+  {s:"B",n:28,t:"mcma",title:"PU 28",q:`Di kelas Pak Fajar terdapat murid dengan ADHD yang mudah terdistraksi dan sering meninggalkan tempat duduk. Pilih semua penyesuaian yang tepat!`,o:[
+  `A. Memberi instruksi singkat dan bertahap dengan penanda visual`,
+  `B. Memecah tugas menjadi bagian kecil dengan target waktu jelas`,
+  `C. Menyediakan jeda gerak terstruktur dan penguatan positif`,
+  `D. Mendudukkan murid sendiri di pojok sebagai konsekuensi gerakannya`,
+  `E. Menghapus seluruh tugas murid tanpa asesmen alternatif`
+  ],k:["A","B","C"]},
+
+  {s:"B",n:29,t:"pg",title:"PU 29",q:`Dalam kerja kelompok empat orang, satu murid mengerjakan hampir seluruh tugas, sedangkan yang lain hanya menunggu. Bu Mira ingin pembelajaran kooperatif tetap digunakan. Perbaikan yang paling tepat adalah ...`,o:[
+  `A. membagi kelompok yang lebih besar agar beban terbagi`,
+  `B. menambah tugas kelompok sehingga semua terpaksa ikut bekerja`,
+  `C. menilai hanya produk akhir kelompok agar murid saling menjaga`,
+  `D. memastikan ketergantungan positif dan akuntabilitas individu, misalnya peran bergilir, bagian tugas yang saling bergantung, dan asesmen individu atas bagian kelompok`
+  ],k:"D"},
+
+  {s:"B",n:30,t:"kat",title:"PU 30",q:`Seorang calon guru menemukan bahwa 38 persen murid belum mencapai tujuan pembelajaran pada asesmen sumatif. Catatan observasi menunjukkan instruksi tugas kurang jelas dan waktu habis sebelum murid selesai. Tentukan Sesuai atau Tidak Sesuai setiap pernyataan evaluasi dan RTL berikut!`,labels:["Sesuai","Tidak Sesuai"],st:[
+  `Menyimpulkan bahwa "murid malas" tanpa mengaitkan dengan data observasi.`,
+  `Menelusuri butir asesmen yang paling banyak salah dan mencocokkannya dengan catatan observasi.`,
+  `Menyusun instruksi bertahap, memperkirakan alokasi waktu, melakukan uji coba pada kelompok kecil, dan menetapkan indikator keberhasilan.`,
+  `Menambah jumlah soal latihan tanpa menganalisis penyebab kesenjangan.`
+  ],k:[1,0,0,1]}
+];
+
+/* =========================================================
+   APLIKASI UJIAN
+   ========================================================= */
+const TOTAL_TIME = 120 * 60;
+let currentIndex = 0;
+let timerSeconds = TOTAL_TIME;
+let timerId = null;
+let submitted = false;
+const answers = {};
+const marked = new Set();
+
+const $ = sel => document.querySelector(sel);
+const qid = q => q.s + q.n;
+
+function typeLabel(q){
+  if(q.t==='pg') return 'Pilihan Ganda';
+  if(q.t==='kat') return 'PGK Kategori';
+  if(q.t==='mcma') return 'PGK MCMA';
+  return '';
+}
+
+function getAnswer(q){ return answers[qid(q)]; }
+
+function setAnswer(q, val){
+  answers[qid(q)] = val;
+  renderSidebar();
+}
+
+function isAnswered(q){
+  const a = answers[qid(q)];
+  if(q.t==='pg') return !!a;
+  if(q.t==='mcma') return Array.isArray(a) && a.length > 0;
+  if(q.t==='kat') {
+    return Array.isArray(a) && a.length === q.st.length && a.every(v => v === 0 || v === 1);
+  }
+  return false;
+}
+
+function scoreQuestion(q){
+  const a = answers[qid(q)];
+  if(q.t==='pg'){
+    const correct = a === q.k;
+    return {score: correct ? 1 : 0, max:1, correct};
+  }
+  if(q.t==='kat'){
+    let correctCount = 0;
+    const arr = Array.isArray(a) ? a : [];
+    q.k.forEach((k,i)=>{ if(arr[i] === k) correctCount++; });
+    return {score: correctCount, max:q.k.length, correct: correctCount === q.k.length};
+  }
+  if(q.t==='mcma'){
+    const arr = Array.isArray(a) ? a : [];
+    const exact = arr.length === q.k.length && q.k.every(k => arr.includes(k));
+    return {score: exact ? 1 : 0, max:1, correct: exact};
+  }
+  return {score:0,max:1,correct:false};
+}
+
+function formatUser(q){
+  const a = answers[qid(q)];
+  if(q.t==='pg') return a || '—';
+  if(q.t==='mcma') return Array.isArray(a) && a.length ? a.join(', ') : '—';
+  if(q.t==='kat'){
+    if(!Array.isArray(a)) return '—';
+    return a.map((v,i)=> v === null || v === undefined ? `${i+1}. —` : `${i+1}. ${q.labels[v]}`).join(' | ');
+  }
+  return '—';
+}
+
+function formatKey(q){
+  if(q.t==='pg') return q.k;
+  if(q.t==='mcma') return q.k.join(', ');
+  if(q.t==='kat') return q.k.map((v,i)=> `${i+1}. ${q.labels[v]}`).join(' | ');
+  return '';
+}
+
+function renderSidebar(){
+  const sidebar = $('#sidebar');
+  const sectionA = DATA.filter(q=>q.s==='A');
+  const sectionB = DATA.filter(q=>q.s==='B');
+  const currentId = qid(DATA[currentIndex]);
+
+  const btn = q => {
+    const id = qid(q);
+    const cls = ['qbtn'];
+    if(isAnswered(q)) cls.push('answered');
+    if(marked.has(id)) cls.push('marked');
+    if(id === currentId) cls.push('current');
+    return `<button class="${cls.join(' ')}" data-id="${id}" title="${q.title}">${q.n}</button>`;
+  };
+
+  sidebar.innerHTML = `
+    <div class="side-title">Navigasi Soal</div>
+    <div class="section-block">
+      <h3>Bagian A — PCK Informatika</h3>
+      <div class="grid">${sectionA.map(btn).join('')}</div>
+    </div>
+    <div class="section-block">
+      <h3>Bagian B — Pedagogi Umum</h3>
+      <div class="grid">${sectionB.map(btn).join('')}</div>
+    </div>
+    <div class="side-footer">
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+      <div id="progressText"></div>
+      <button class="danger" id="submitBtn">Selesai & Kirim Jawaban</button>
+    </div>
+  `;
+
+  sidebar.querySelectorAll('.qbtn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const idx = DATA.findIndex(q=>qid(q)===b.dataset.id);
+      if(idx>=0){ currentIndex = idx; renderQuestion(); renderSidebar(); }
+    });
+  });
+  $('#submitBtn').addEventListener('click', ()=>submitExam(false));
+  updateProgress();
+}
+
+function updateProgress(){
+  const answered = DATA.filter(isAnswered).length;
+  const total = DATA.length;
+  const pct = total ? Math.round(answered/total*100) : 0;
+  const bar = $('#progressBar');
+  const txt = $('#progressText');
+  if(bar) bar.style.width = pct + '%';
+  if(txt) txt.innerHTML = `<span>${answered}/${total} terjawab</span><span>${pct}%</span>`;
+}
+
+function renderQuestion(){
+  if(submitted) return;
+  const q = DATA[currentIndex];
+  if(!q){
+    console.error('Soal tidak ditemukan pada indeks', currentIndex);
+    return;
+  }
+  $('#sectionBadge').textContent = q.s === 'A' ? 'Bagian A — PCK Informatika' : 'Bagian B — Pedagogi Umum';
+  $('#typeBadge').textContent = typeLabel(q);
+  $('#qTitle').textContent = `${q.title} — ${typeLabel(q)}`;
+  
+  // Render text
+  $('#qText').innerHTML = q.q;
+
+  let html = '';
+  if(q.note) html += `<div class="note">${q.note}</div>`;
+
+  if(q.t==='pg'){
+    html += `<div class="options">`;
+    q.o.forEach((opt,i)=>{
+      const letter = String.fromCharCode(65+i);
+      const checked = getAnswer(q) === letter ? 'checked' : '';
+      html += `<label class="option">
+        <input type="radio" name="pg-${qid(q)}" value="${letter}" ${checked}>
+        <span>${opt}</span>
+      </label>`;
+    });
+    html += `</div>`;
+  } else if(q.t==='mcma'){
+    // Perubahan: tidak ada limitasi pilihan (pick)
+    const arr = getAnswer(q) || [];
+    html += `<div class="hint">Pilih semua jawaban yang tepat (jumlah jawaban benar tidak diberitahukan).</div><div class="options">`;
+    q.o.forEach((opt,i)=>{
+      const letter = String.fromCharCode(65+i);
+      const checked = arr.includes(letter) ? 'checked' : '';
+      html += `<label class="option">
+        <input type="checkbox" name="mcma-${qid(q)}" value="${letter}" ${checked}>
+        <span>${opt}</span>
+      </label>`;
+    });
+    html += `</div>`;
+  } else if(q.t==='kat'){
+    const arr = getAnswer(q) || Array(q.st.length).fill(null);
+    html += `<table class="kat-table"><thead><tr>
+      <th>No</th><th>Pernyataan</th><th>${q.labels[0]}</th><th>${q.labels[1]}</th>
+    </tr></thead><tbody>`;
+    q.st.forEach((st,i)=>{
+      const v = arr[i];
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${st}</td>
+        <td><input type="radio" name="kat-${qid(q)}-${i}" value="0" ${v===0?'checked':''}></td>
+        <td><input type="radio" name="kat-${qid(q)}-${i}" value="1" ${v===1?'checked':''}></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  $('#qBody').innerHTML = html;
+  $('#markBtn').textContent = marked.has(qid(q)) ? 'Hapus Ragu-ragu' : 'Ragu-ragu';
+
+  if(q.t==='pg'){
+    document.querySelectorAll(`input[name="pg-${qid(q)}"]`).forEach(inp=>{
+      inp.addEventListener('change', e=>{
+        setAnswer(q, e.target.value);
+      });
+    });
+  } else if(q.t==='mcma'){
+    document.querySelectorAll(`input[name="mcma-${qid(q)}"]`).forEach(inp=>{
+      inp.addEventListener('change', e=>{
+        let arr = getAnswer(q) || [];
+        if(e.target.checked){
+          arr = [...arr, e.target.value];
+        } else {
+          arr = arr.filter(x=>x !== e.target.value);
+        }
+        setAnswer(q, arr);
+      });
+    });
+  } else if(q.t==='kat'){
+    document.querySelectorAll(`input[type="radio"][name^="kat-${qid(q)}-"]`).forEach(inp=>{
+      inp.addEventListener('change', e=>{
+        const idx = Number(e.target.name.split('-').pop());
+        let arr = getAnswer(q) || Array(q.st.length).fill(null);
+        arr = arr.slice();
+        arr[idx] = Number(e.target.value);
+        setAnswer(q, arr);
+      });
+    });
+  }
+}
+
+function startTimer(){
+  updateTimer();
+  timerId = setInterval(()=>{
+    timerSeconds--;
+    updateTimer();
+    if(timerSeconds <= 0){
+      clearInterval(timerId);
+      alert('Waktu habis. Jawaban dikirim otomatis.');
+      submitExam(true);
+    }
+  }, 1000);
+}
+
+function updateTimer(){
+  const h = Math.floor(timerSeconds/3600);
+  const m = Math.floor((timerSeconds%3600)/60);
+  const s = timerSeconds%60;
+  const el = $('#timer');
+  el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(timerSeconds <= 300) el.classList.add('danger');
+}
+
+function calculateResult(){
+  let score = 0, max = 0;
+  const sections = {A:{score:0,max:0}, B:{score:0,max:0}};
+  const details = [];
+  DATA.forEach(q=>{
+    const res = scoreQuestion(q);
+    score += res.score;
+    max += res.max;
+    sections[q.s].score += res.score;
+    sections[q.s].max += res.max;
+    details.push({
+      q, ...res,
+      user: formatUser(q),
+      key: formatKey(q)
+    });
+  });
+  return {score, max, percent: max ? (score/max*100) : 0, sections, details};
+}
+
+function submitExam(auto){
+  if(submitted) return;
+  if(!auto){
+    const answered = DATA.filter(isAnswered).length;
+    const belum = DATA.length - answered;
+    if(!confirm(`Yakin ingin mengirim jawaban? ${belum} soal belum terjawab lengkap. Setelah dikirim, jawaban tidak dapat diubah.`)){
+      return;
+    }
+  }
+  submitted = true;
+  clearInterval(timerId);
+  renderResult();
+}
+
+function renderResult(){
+  const result = calculateResult();
+  const examView = $('#examView');
+  const resultView = $('#resultView');
+  examView.style.display = 'none';
+  resultView.style.display = 'block';
+
+  const detailRows = result.details.map(d=>{
+    const q = d.q;
+    return `<tr>
+      <td>${q.s}${q.n}</td>
+      <td>${q.title}</td>
+      <td>${typeLabel(q)}</td>
+      <td>${d.correct ? '<span class="ok-text">Benar</span>' : '<span class="bad-text">Belum tepat</span>'}</td>
+      <td>${d.user}</td>
+      <td>${d.key}</td>
+    </tr>`;
+  }).join('');
+
+  resultView.innerHTML = `
+    <div class="result-wrap">
+      <div>
+        <h2 style="margin:0 0 6px">Hasil Latihan UKPPPG Informatika 2026</h2>
+        <div style="color:var(--muted);font-size:13px">Penilaian otomatis berdasarkan kunci pada dokumen latihan.</div>
+      </div>
+
+      <div class="score-grid">
+        <div class="score-card">
+          <div class="label">Skor Total</div>
+          <div class="value">${result.score.toFixed(0)}<span style="font-size:14px;color:var(--muted)">/${result.max}</span></div>
+          <div class="small">${result.percent.toFixed(1)}%</div>
+        </div>
+        <div class="score-card">
+          <div class="label">Bagian A — PCK</div>
+          <div class="value">${result.sections.A.score}<span style="font-size:14px;color:var(--muted)">/${result.sections.A.max}</span></div>
+          <div class="small">Informatika</div>
+        </div>
+        <div class="score-card">
+          <div class="label">Bagian B — PU</div>
+          <div class="value">${result.sections.B.score}<span style="font-size:14px;color:var(--muted)">/${result.sections.B.max}</span></div>
+          <div class="small">Pedagogi Umum</div>
+        </div>
+        <div class="score-card">
+          <div class="label">Status</div>
+          <div class="value" style="font-size:18px">${result.percent >= 70 ? 'Baik' : 'Perlu Latihan'}</div>
+          <div class="small">Ambang latihan: 70%</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="primary" onclick="location.reload()">Ulangi Ujian</button>
+        <button onclick="window.print()">Cetak / Simpan PDF</button>
+      </div>
+
+      <div style="overflow:auto;max-height:60vh;border:1px solid var(--line);border-radius:14px">
+        <table class="result-table">
+          <thead><tr>
+            <th>No</th><th>Soal</th><th>Bentuk</th><th>Status</th><th>Jawaban Anda</th><th>Kunci</th>
+          </tr></thead>
+          <tbody>${detailRows}</tbody>
+        </table>
+      </div>
+
+      <div style="font-size:12px;color:var(--muted);line-height:1.5">
+        Catatan: PGK Kategori dinilai per pernyataan. PGK MCMA dinilai benar jika seluruh pilihan tepat sesuai kunci.
+        Soal PCK 35 memiliki teks terpotong pada dokumen sumber.
+      </div>
+    </div>
+  `;
+}
+
+$('#prevBtn').addEventListener('click', ()=>{
+  if(currentIndex > 0){ currentIndex--; renderQuestion(); renderSidebar(); }
+});
+$('#nextBtn').addEventListener('click', ()=>{
+  if(currentIndex < DATA.length - 1){ currentIndex++; renderQuestion(); renderSidebar(); }
+});
+$('#markBtn').addEventListener('click', ()=>{
+  const id = qid(DATA[currentIndex]);
+  if(marked.has(id)) marked.delete(id); else marked.add(id);
+  renderSidebar();
+  $('#markBtn').textContent = marked.has(id) ? 'Hapus Ragu-ragu' : 'Ragu-ragu';
+});
+$('#clearBtn').addEventListener('click', ()=>{
+  const q = DATA[currentIndex];
+  delete answers[qid(q)];
+  renderQuestion();
+  renderSidebar();
+});
+
+renderSidebar();
+renderQuestion();
+startTimer();
+</script>
+</body>
+</html>
